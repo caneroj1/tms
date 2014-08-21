@@ -21,26 +21,17 @@ module TMS
 
 		def parse(phrase)
 			if query?(phrase)
-				parse_query(phrase)
+				parse_input(phrase, 0)
 			elsif assertion?(phrase)
-				parse_assertion(phrase)
+				parse_input(phrase, 1)
 			else
 				nil
 			end
 		end
 
-		def parse_assertion(phrase)
-			tokens = phrase.gsub(/[.|?]/, "").split(" ")
-			if assert_tokens_correct(tokens)
-				@chain.send(tokens[0].to_sym, tokens)
-			else
-				nil
-			end
-		end
-
-		def parse_query(phrase)
-			tokens = phrase.gsub(/[.|?]/, "").split(" ")
-			@chain.send(tokens[0].to_sym, tokens)
+		def parse_input(phrase, switch)
+			tokens = tokenize_query(phrase)
+			input_correct?(phrase, switch) ? @chain.send(tokens[0].to_sym, tokens) : nil
 		end
 		
 		private
@@ -57,6 +48,26 @@ module TMS
 			else
 				false
 			end
+		end
+
+		def query_tokens_correct(tokens)
+			if tokens.include?("are")
+				(tokens.[1].eql?("all") && tokens.count.eql?(4)) || (tokens[1].eql?("no") && tokens.count.eql?(4)) ||
+				(tokens.[1].eql?("any") && tokens.count.eql?(4) && !tokens.include?("not")) ||
+				(tokens.[1].eql?("any") && tokens.count.eql?(5) && tokens[3].eql?("not"))
+			elsif tokens.include?("describe")
+				tokens.count.eql?(2)
+			else
+				false
+			end
+		end
+
+		def input_correct?(tokens, switch)
+			(query_tokens_correct(tokens) && switch.eql?(0)) || (assert_tokens_correct(tokens) && switch.eql?(1))
+		end
+
+		def tokenize_query(phrase)
+			phrase.gsub(/[.|?]/, "").split(" ")
 		end
 
 		def query?(phrase)
