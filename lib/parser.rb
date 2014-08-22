@@ -31,7 +31,7 @@ module TMS
 
 		def parse_input(phrase, switch)
 			tokens = tokenize_query(phrase)
-			input_correct?(phrase, switch) ? @chain.send(tokens[0].to_sym, tokens) : nil
+			input_correct?(tokens, switch) ? @chain.send(tokens[0].to_sym, tokens) : nil
 		end
 		
 		private
@@ -52,9 +52,9 @@ module TMS
 
 		def query_tokens_correct(tokens)
 			if tokens.include?("are")
-				(tokens.[1].eql?("all") && tokens.count.eql?(4)) || (tokens[1].eql?("no") && tokens.count.eql?(4)) ||
-				(tokens.[1].eql?("any") && tokens.count.eql?(4) && !tokens.include?("not")) ||
-				(tokens.[1].eql?("any") && tokens.count.eql?(5) && tokens[3].eql?("not"))
+				(tokens[1].eql?("all") && tokens.count.eql?(4)) || (tokens[1].eql?("no") && tokens.count.eql?(4)) ||
+				(tokens[1].eql?("any") && tokens.count.eql?(4) && !tokens.include?("not")) ||
+				(tokens[1].eql?("any") && tokens.count.eql?(5) && tokens[3].eql?("not"))
 			elsif tokens.include?("describe")
 				tokens.count.eql?(2)
 			else
