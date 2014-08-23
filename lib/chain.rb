@@ -37,7 +37,7 @@ module TMS
 					no_query(tokens)
 				end
 			else
-
+				some_query(tokens)
 			end
 		end
 
@@ -49,6 +49,12 @@ module TMS
 		def no_query(tokens)
 			base = @bases[@bases.index { |b| b.noun.eql?(tokens[2]) }]
 			base.links[tokens[3]].qualifier.eql?("no")
+		end
+
+		def some_query(tokens)
+			base = @bases[@bases.index { |b| b.noun.eql?(tokens[2]) }]
+			params = !tokens.count.eql?(5) ? [3, nil] : [4, "not"]
+			base.links[tokens[params[0]]].qualifier.eql?("some") && base.links[tokens[params[0]]].secondary_qualifier.eql?(params[1])
 		end
 
 		def describe(tokens)
@@ -77,8 +83,8 @@ module TMS
 
 				old_base.links.select { |key, link| link != new_link }.each_pair do |key, link|
 					qualifier = qualifiers[link.qualifier] <= qualifiers[new_link.qualifier] ? link.qualifier : new_link.qualifier
-					new_base.create_link(TMS::Link.new(qualifier, link.base, link.secondary_qualifier))
-					link.base.create_link(TMS::Link.new(qualifier, new_base, link.secondary_qualifier))
+					new_base.create_link(TMS::Link.new(qualifier, link.base, new_link.secondary_qualifier))
+					link.base.create_link(TMS::Link.new(qualifier, new_base, new_link.secondary_qualifier))
 				end
 			end
 		end
