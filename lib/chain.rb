@@ -28,6 +28,29 @@ module TMS
 			"I know that now!"
 		end
 
+		def query(tokens)
+			if !tokens[1].eql?("any")
+				case tokens[1]
+				when "all"
+					all_query(tokens)
+				when "no"
+					no_query(tokens)
+				end
+			else
+
+			end
+		end
+
+		def all_query(tokens)
+			base = @bases[@bases.index { |b| b.noun.eql?(tokens[2]) }]
+			base.links[tokens[3]].qualifier.eql?("all")
+		end
+
+		def no_query(tokens)
+			base = @bases[@bases.index { |b| b.noun.eql?(tokens[2]) }]
+			base.links[tokens[3]].qualifier.eql?("no")
+		end
+
 		def describe(tokens)
 			base = @bases.index { |b| b.noun.eql?(tokens[1]) }
 			@bases[base].describe
@@ -52,7 +75,7 @@ module TMS
 				old_base = bases[2] ? bases[1] : bases[0]
 				new_base = bases[2] ? bases[0] : bases[1]
 
-				old_base.links.select { |link| link != new_link }.each do |link|
+				old_base.links.select { |key, link| link != new_link }.each_pair do |key, link|
 					qualifier = qualifiers[link.qualifier] <= qualifiers[new_link.qualifier] ? link.qualifier : new_link.qualifier
 					new_base.create_link(TMS::Link.new(qualifier, link.base, link.secondary_qualifier))
 					link.base.create_link(TMS::Link.new(qualifier, new_base, link.secondary_qualifier))
@@ -65,7 +88,6 @@ module TMS
 			link_2 = TMS::Link.new(tokens[0], bases[0], tokens.count.eql?(5) ? "not" : nil)
 			bases[0].create_link(link_1)
 			bases[1].create_link(link_2)
-
 			@bases.push(bases[0], bases[1])
 			complete_graph(bases, link_1)
 		end

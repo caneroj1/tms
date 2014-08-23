@@ -31,7 +31,13 @@ module TMS
 
 		def parse_input(phrase, switch)
 			tokens = tokenize_query(phrase)
-			input_correct?(tokens, switch) ? @chain.send(tokens[0].to_sym, tokens) : nil
+			if input_correct?(tokens, switch) && switch.eql?(1)
+				@chain.send(tokens[0].to_sym, tokens)
+			elsif input_correct?(tokens, switch) && switch.eql?(0)
+				@chain.query(tokens)
+			else
+				nil
+			end
 		end
 		
 		private
@@ -45,6 +51,8 @@ module TMS
 				tokens[0].eql?("some") && tokens[2].eql?("are")) ||
 				(tokens.include?("are") && tokens.include?("not") && tokens.count.eql?(5) &&
 				tokens[0].eql?("some") && tokens[2].eql?("are") && tokens[3].eql?("not"))
+			elsif tokens.include?("describe")
+				tokens.count.eql?(2)
 			else
 				false
 			end
@@ -55,8 +63,6 @@ module TMS
 				(tokens[1].eql?("all") && tokens.count.eql?(4)) || (tokens[1].eql?("no") && tokens.count.eql?(4)) ||
 				(tokens[1].eql?("any") && tokens.count.eql?(4) && !tokens.include?("not")) ||
 				(tokens[1].eql?("any") && tokens.count.eql?(5) && tokens[3].eql?("not"))
-			elsif tokens.include?("describe")
-				tokens.count.eql?(2)
 			else
 				false
 			end
@@ -71,11 +77,11 @@ module TMS
 		end
 
 		def query?(phrase)
-			/are.*\?/.match(phrase) || /describe.*\./.match(phrase)
+			/are.*\?/.match(phrase)
 		end
 
 		def assertion?(phrase)
-			 /[all|no|some].*\./.match(phrase)
+			 /[all|no|some].*\./.match(phrase) || /describe.*\./.match(phrase)
 		end
 	end
 end
