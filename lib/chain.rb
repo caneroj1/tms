@@ -11,29 +11,41 @@ module TMS
 
 		def all(tokens)
 			bases = prepare_data(tokens, false)
-			link = TMS::Link.new(tokens[0], bases[1])
-			bases[0].create_link(link)
+
+			link_1 = TMS::Link.new(tokens[0], bases[1])
+			link_2 = TMS::Link.new(tokens[0], bases[0])
+			bases[0].create_link(link_1)
+			bases[1].create_link(link_2)
+
 			@bases.push(bases[0], bases[1])
-			complete_graph(bases, link)
+			complete_graph(bases, link_1)
 			"OK!"
 		end
 
 		def no(tokens)
 			bases = prepare_data(tokens, false)
-			link = TMS::Link.new(tokens[0], bases[1])
-			bases[0].create_link(link)
+
+			link_1 = TMS::Link.new(tokens[0], bases[1])
+			link_2 = TMS::Link.new(tokens[0], bases[0])
+			bases[0].create_link(link_1)
+			bases[1].create_link(link_2)
+
 			@bases.push(bases[0], bases[1])
-			complete_graph(bases, link)
+			complete_graph(bases, link_1)
 			"Got it!"
 		end
 
 		def some(tokens)
 			some_not = tokens.count.eql?(5)
 			bases = prepare_data(tokens, some_not)
-			link = TMS::Link.new(tokens[0], bases[1], some_not ? "not" : nil)
-			bases[0].create_link(link)
+
+			link_1 = TMS::Link.new(tokens[0], bases[1], some_not ? "not" : nil)
+			link_2 = TMS::Link.new(tokens[0], bases[0], some_not ? "not" : nil)
+			bases[0].create_link(link_1)
+			bases[1].create_link(link_2)
+
 			@bases.push(bases[0], bases[1])
-			complete_graph(bases, link)
+			complete_graph(bases, link_1)
 			"I know that now!"
 		end
 
@@ -52,6 +64,7 @@ module TMS
 				old_base.links.select { |link| link != new_link }.each do |link|
 					qualifier = qualifiers[link.qualifier] <= qualifiers[new_link.qualifier] ? link.qualifier : new_link.qualifier
 					new_base.create_link(TMS::Link.new(qualifier, link.base, link.secondary_qualifier))
+					link.base.create_link(TMS::Link.new(qualifier, new_base, link.secondary_qualifier))
 				end
 			end
 		end
